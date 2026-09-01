@@ -109,7 +109,7 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
     subscribed = await check_subscription(update, context)
 
     if not subscribed:
-        await subscription_message(update, context)
+        await subscription_message(update)
         return
 
     url = clean_url(update.message.text)

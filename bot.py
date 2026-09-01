@@ -2,6 +2,8 @@ import os
 import re
 import tempfile
 import asyncio
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 import yt_dlp
@@ -196,6 +198,24 @@ async def health(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🤖 البوت يعمل بنجاح!")
 
 
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"BOT IS RUNNING")
+
+    def log_message(self, format, *args):
+        pass
+
+
+def run_health_server():
+    port = int(os.environ.get("PORT", "10000"))
+    server = HTTPServer(("0.0.0.0", port), HealthHandler)
+    server.serve_forever()
+
+
+threading.Thread(target=run_health_server, daemon=True).start()
 def main():
     if not BOT_TOKEN:
         raise RuntimeError("BOT_TOKEN غير موجود في Environment Variables")
